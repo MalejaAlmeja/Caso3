@@ -1,0 +1,6 @@
+Numero clientes emisores: 4
+Numero mensajes por cliente: 4
+Numero filtros de spam: 4
+Numero de servidores de entrega: 4
+Capacidad maxima de buzon de entrada: 20
+Capacidad del buzon de entrega: 30
