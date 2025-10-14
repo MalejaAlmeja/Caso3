@@ -1,16 +1,13 @@
-import java.util.ArrayList;
 
 public class ClienteEmisor extends Thread {
     int idCliente;
     int numeroCorreos;
-    int tamanioBuzonEntrada;
-    static ArrayList<Correo> buzonEntrada;
+    static BuzonEntrada buzonEntrada;
     
-    public ClienteEmisor(int idCliente, int numeroCorreos, int tamanioBuzonEntrada) {
+    
+    public ClienteEmisor(int idCliente, int numeroCorreos, int tamanioBuzonEntrada, BuzonEntrada buzonEntrada) {
         this.idCliente = idCliente;
         this.numeroCorreos = numeroCorreos;
-        this.buzonEntrada = new ArrayList<>(tamanioBuzonEntrada);
-        System.out.println("Cliente Emisor " + idCliente + " creado, creando " + numeroCorreos + " correos.");
         start();
     }
 
@@ -19,18 +16,18 @@ public class ClienteEmisor extends Thread {
         for (int i = 0; i < numeroCorreos; i++) {
             boolean esSpam;
             esSpam = Math.random() < 0.5; 
-
             Correo correo = new Correo(idCliente, esSpam);
-            synchronized (buzonEntrada) {
-                buzonEntrada.add(correo); // añadir caso donde el buzon esta lleno, no sé si es acá
-                System.out.println("Cliente Emisor " + idCliente + " ha enviado el correo " + correo.getId());
-                buzonEntrada.notifyAll();
+
+            System.out.println("Cliente Emisor " + idCliente + " enviando correo " + (i + 1) + "/" + numeroCorreos + (esSpam ? " (SPAM)" : ""));
+            while (buzonEntrada.capacidad <= buzonEntrada.ocupacion) {
+                try {
+                    wait(); //CREO QUE ACÁ NO VA
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
-            try {
-                Thread.sleep((long) (Math.random() * 1000)); // resolver
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            buzonEntrada.correos.add(correo);
+            buzonEntrada.ocupacion++;
         }
         System.out.println("Cliente Emisor " + idCliente + " ha terminado de enviar correos.");
     }

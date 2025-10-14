@@ -1,14 +1,10 @@
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
 
 public class Simulador {
     public static void main(String[] args) {
-        ArrayList<Correo> buzonEntrada;
-        ArrayList<Correo> buzonEntrega;
-        ArrayList<Correo> buzonCuarentena;
-
+    
         int clientesEmisores = 0;
         int mensajesPorCliente = 0;
         int filtrosSpam = 0;
@@ -38,13 +34,13 @@ public class Simulador {
             e.printStackTrace();
         }
 
-        buzonEntrada = new ArrayList<>(capacidadMaximaBuzonEntrada);
-        buzonEntrega = new ArrayList<>(capacidadBuzonEntrega);
-        buzonCuarentena = new ArrayList<>();
+        BuzonEntrada buzonEntrada = new BuzonEntrada(capacidadMaximaBuzonEntrada);
+        BuzonEntrega buzonEntrega = new BuzonEntrega(capacidadBuzonEntrega);
+        BuzonCuarentena buzonCuarentena = new BuzonCuarentena();
 
         for (int i = 0; i < clientesEmisores; i++) {
             int numeroCorreos = 20 + (int)(Math.random() * 81);
-            ClienteEmisor cliente = new ClienteEmisor(i + 1, numeroCorreos, capacidadMaximaBuzonEntrada);
+            ClienteEmisor cliente = new ClienteEmisor(i + 1, numeroCorreos, capacidadMaximaBuzonEntrada,buzonEntrada);
         }
     
     }}
