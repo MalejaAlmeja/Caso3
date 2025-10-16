@@ -3,17 +3,38 @@ import java.util.ArrayList;
 public class BuzonEntrada {
     public int capacidad = 0;
     public int ocupacion = 0;
-    public ArrayList<Correo> correos;
+    public static ArrayList<Correo> correos;
 
     public BuzonEntrada(int capacidad) {
         this.capacidad = capacidad;
     }
 
-    public synchronized void entraCorreo(Correo correo) {
-        correos.add(correo);
+    public synchronized void recibirMensaje(Correo correo){
+        while (ocupacion == capacidad) {
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        notifyAll();
         ocupacion++;
-        //CREO QUE AQUÍ PONGO LO DEL WAIT Y TAL
+        correos.add(correo); 
     }
+
+    public synchronized void eliminarMensaje(Correo correo){
+        while (ocupacion == 0) {
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        notifyAll();
+        ocupacion--;
+        correos.remove(correo);
+    }
+
 
     
     

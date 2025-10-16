@@ -39,8 +39,14 @@ public class Simulador {
         BuzonCuarentena buzonCuarentena = new BuzonCuarentena();
 
         for (int i = 0; i < clientesEmisores; i++) {
-            int numeroCorreos = 20 + (int)(Math.random() * 81);
-            ClienteEmisor cliente = new ClienteEmisor(i + 1, numeroCorreos, capacidadMaximaBuzonEntrada,buzonEntrada);
+            ClienteEmisor cliente = new ClienteEmisor(i + 1, mensajesPorCliente,buzonEntrada);
+            cliente.start();
+        }
+        //No sé si sea lógico despertar a los filtros de spam desde aquí de una vez. debería ser algún cliente emisor
+        // que lo despierte pero no sé cómo.
+        for (int i = 0; i < filtrosSpam; i++) {
+            FiltroSpam filtro = new FiltroSpam(filtrosSpam, buzonEntrada, buzonCuarentena, buzonEntrega);
+            filtro.start();
         }
     
     }}
