@@ -1,3 +1,4 @@
+package caso3;
 import java.util.ArrayList;
 
 public class BuzonCuarentena {
@@ -7,10 +8,10 @@ public class BuzonCuarentena {
     public BuzonCuarentena(){}
 
     //ESPERA SEMIACTIVA - CORREGIR
-    public synchronized void recibirMensaje(Correo correo){
-        //ACÁ QUÉ PONGO????
+    public synchronized boolean recibirMensaje(Correo correo){
         ocupacion++;
         correos.add(correo); 
+        return true;
     }
 
     //ESPERA SEMIACTIVA - CORREGIR

@@ -1,3 +1,4 @@
+package caso3;
 public class Correo {
     private static int secuencial = 0;
     private int id;
@@ -5,6 +6,9 @@ public class Correo {
     private boolean esInicio;
     private boolean esFin;
     public int idCliente;
+    public int tiempoSpam = -1;
+    
+    public boolean finDefinitivo;
     
     public Correo(int idCliente, boolean spam, boolean esInicio, boolean esFin) {
         int nuevoId = Integer.parseInt("" + idCliente + secuencial);
@@ -25,6 +29,14 @@ public class Correo {
     }
     public boolean esFin() {
         return esFin;
+    }
+    
+    public void setTiempoEsperaEnSpam(int tiempo) {
+    	this.tiempoSpam = tiempo;
+    }
+    
+    public void setFinDefinitivo() {
+    	this.finDefinitivo = true;
     }
 
 

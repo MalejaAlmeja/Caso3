@@ -1,7 +1,8 @@
+package caso3;
 import java.util.ArrayList;
 
 public class BuzonEntrega {
- private int capacidad = 0;
+ private int capacidad;
  private int ocupacion = 0;
  public static ArrayList<Correo> correos;
 
@@ -9,32 +10,23 @@ public class BuzonEntrega {
         this.capacidad = capacidad;
     }   
 
-    //ESPERA SEMIACTIVA - CAMBIAR CREO - NO SÉ DÓNDE DE PONE EL YIELD
-    public synchronized void recibirMensaje(Correo correo){
+    public synchronized boolean recibirMensaje(Correo correo){
         while (ocupacion == capacidad) {
-            try {
-                wait();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            return false;
         }
         notifyAll();
         ocupacion++;
         correos.add(correo); 
+        return true;
     }
 
-    //ESPERA ACTIVA - CAMBIAR
-    public synchronized void eliminarMensaje(Correo correo){
-        while (ocupacion == 0) {
-            try {
-                wait();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+    public synchronized Correo eliminarMensaje() {
+        if (correos.isEmpty()) {
+            return null; 
         }
-        notifyAll();
-        ocupacion--;
-        correos.remove(correo);
+        Correo c = correos.remove(0);
+        notifyAll(); 
+        return c;
     }
     
 }

@@ -1,8 +1,9 @@
+package caso3;
 
 public class ClienteEmisor extends Thread {
     int idCliente;
     int numeroCorreos;
-    static BuzonEntrada buzonEntrada;
+    public static BuzonEntrada buzonEntrada;
     
     
     public ClienteEmisor(int idCliente,int numeroCorreos, BuzonEntrada buzonEntrada) {
@@ -13,7 +14,8 @@ public class ClienteEmisor extends Thread {
 
     @Override
     public void run() {
-        System.out.println("Cliente Emisor " + idCliente + " ha empieza a enviar correos.");
+        System.out.println("Cliente Emisor " + idCliente + " ha empezado a enviar correos.");
+        
         for (int i = 0; i < numeroCorreos+2; i++) {
             if (i==0){
                 Correo correoInicio = new Correo(idCliente, false, true, false);
@@ -22,7 +24,7 @@ public class ClienteEmisor extends Thread {
             else if (i==numeroCorreos+1){
                 Correo correoFin = new Correo(idCliente, false, false, true);
                 buzonEntrada.recibirMensaje(correoFin);
-                break;
+                
             }
             else{
             boolean esSpam;
