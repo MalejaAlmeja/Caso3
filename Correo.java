@@ -1,43 +1,26 @@
-package caso3;
+import java.util.concurrent.atomic.AtomicInteger;
+
 public class Correo {
-    private static int secuencial = 0;
+    private static final AtomicInteger SECUENCIAL = new AtomicInteger(0);
     private int id;
     private boolean spam;
     private boolean esInicio;
     private boolean esFin;
     public int idCliente;
     public int tiempoSpam = -1;
-    
-    public boolean finDefinitivo;
-    
+    public boolean finDefinitivo = false;
+
     public Correo(int idCliente, boolean spam, boolean esInicio, boolean esFin) {
-        int nuevoId = Integer.parseInt("" + idCliente + secuencial);
-        this.id = nuevoId;
+        this.idCliente = idCliente;
         this.spam = spam;
         this.esInicio = esInicio;
         this.esFin = esFin;
-        secuencial++;
+        this.id = idCliente * 100000 + SECUENCIAL.getAndIncrement();
     }
-    public int getId() {
-        return id;
-    }
-    public boolean esSpam() {
-        return spam;
-    }
-    public boolean esInicio() {
-        return esInicio;
-    }
-    public boolean esFin() {
-        return esFin;
-    }
-    
-    public void setTiempoEsperaEnSpam(int tiempo) {
-    	this.tiempoSpam = tiempo;
-    }
-    
-    public void setFinDefinitivo() {
-    	this.finDefinitivo = true;
-    }
-
-
+    public int getId() { return id; }
+    public boolean esSpam() { return spam; }
+    public boolean esInicio() { return esInicio; }
+    public boolean esFin() { return esFin; }
+    public void setTiempoEsperaEnSpam(int tiempo) { this.tiempoSpam = tiempo; }
+    public void setFinDefinitivo() { this.finDefinitivo = true; }
 }

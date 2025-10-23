@@ -1,110 +1,111 @@
-package caso3;
 import java.util.Random;
+
 public class FiltroSpam extends Thread {
-	
-	public Random random = new Random();
-	
-    BuzonEntrada buzonEntrada;
-    BuzonCuarentena buzonCuarentena;
-    BuzonEntrega buzonEntrega;
-    
-    int numeroFiltros;
-    int numeroClientes = 0;
-    int numeroClientesProcesados = 0;
-    
-    public FiltroSpam(int numeroFiltros, BuzonEntrada buzonEntrada, BuzonCuarentena buzonCuarentena, BuzonEntrega buzonEntrega) {
-        this.numeroFiltros = numeroFiltros;
+    private final Random random = new Random();
+
+    private final BuzonEntrada buzonEntrada;
+    private final BuzonCuarentena buzonCuarentena;
+    private final BuzonEntrega buzonEntrega;
+
+    // Variables estáticas compartidas
+    public static int numeroClientes = 0;
+    public static int numClienteTot = 0;
+    public static int numeroClientesProcesados = 0;
+    public static boolean servidoresIniciados = false; // 🔹 nuevo flag para iniciar entrega solo una vez
+
+    public FiltroSpam(BuzonEntrada buzonEntrada, BuzonCuarentena buzonCuarentena, BuzonEntrega buzonEntrega) {
         this.buzonEntrada = buzonEntrada;
         this.buzonCuarentena = buzonCuarentena;
         this.buzonEntrega = buzonEntrega;
     }
 
     @Override
-    public void run() { 
+    public void run() {
         System.out.println("Filtro de Spam despertado.");
+
         while (true) {
-            if (buzonEntrada.ocupacion > 0) {
-                Correo correo = buzonEntrada.correos.get(0);
-                buzonEntrada.eliminarMensaje(correo);
-                if (correo.esInicio()) {
+            if (ServidorEntrega.llegoMensajeFin) break;
+
+            Correo correo = buzonEntrada.sacarCorreo(this);
+            if (correo == null) continue;
+
+
+            if (correo.esInicio()) {
+                synchronized (FiltroSpam.class) {
                     numeroClientes++;
-                    System.out.println("Filtro de Spam ha recibido el correo de inicio del Cliente Emisor " + correo.idCliente + ".");
-                } else if (correo.esFin()) {
+                    if (!servidoresIniciados) {
+                        servidoresIniciados = true;
+                        System.out.println("Primer cliente detectado. Iniciando servidores de entrega...");
+                        Simulador.iniciarServidoresEntrega();
+                    }
+                }
+
+                System.out.println("El filtro de spam " + this.getName() +
+                        " recibió correos de un nuevo cliente.");
+            }
+
+            else if (correo.esFin()) {
+                synchronized (FiltroSpam.class) {
                     numeroClientesProcesados++;
-                    
-                    System.out.println("Filtro de Spam ha recibido el correo de fin del Cliente Emisor " + correo.idCliente + ".");
-                    break;
-                    
-                } else if (correo.esSpam()) {
-                	int tiempoEsperaSpam = random.nextInt(10000, 20001);
-                	correo.setTiempoEsperaEnSpam(tiempoEsperaSpam);
-                    buzonCuarentena.recibirMensaje(correo);
-                    System.out.println("Filtro de Spam ha detectado un correo spam del Cliente Emisor " + correo.idCliente + " y lo ha enviado a cuarentena.");
-                } else {
-                	
-                	boolean checkSemiActiva = false;
-                	while(!checkSemiActiva) {
-                		synchronized (buzonEntrega) {
-                			checkSemiActiva = buzonEntrega.recibirMensaje(correo);
-                		}
-                		if(checkSemiActiva == false) {
-                			FiltroSpam.yield();
-                		}
-                		
-                	}
-                	
-                    //buzonEntrega.recibirMensaje(correo);
-                    System.out.println("Filtro de Spam ha verificado un correo no spam del Cliente Emisor " + correo.idCliente + " y lo ha enviado al buzón de entrega.");
+                    System.out.println("El filtro de spam " + this.getName() +
+                            " recibió todos los correos del usuario.");
+
+                    if (numeroClientesProcesados >= numClienteTot && !ServidorEntrega.llegoMensajeFin) {
+                        ServidorEntrega.llegoMensajeFin = true;
+                        System.out.println("Todos los clientes procesados. " + this.getName() +
+                                " envía el correo de fin.");
+                        enviarMensajeFinABuzonEntrega();
+                    }
                 }
             }
-            
-            if(numeroClientesProcesados == numeroClientes) {
-            	enviarMensajeFinABuzonEntrega();
+
+            else if (correo.esSpam()) {
+                int tiempoEsperaSpam = random.nextInt(10000, 20001);
+                correo.setTiempoEsperaEnSpam(tiempoEsperaSpam);
+                buzonCuarentena.recibirMensaje(correo);
+                System.out.println("Filtro de Spam ha detectado un correo spam del Cliente Emisor " +
+                        correo.idCliente + " y lo ha enviado a cuarentena.");
             }
-            
+
+            else {
+                boolean insertado = false;
+                while (!insertado) {
+                    synchronized (buzonEntrega) {
+                        insertado = buzonEntrega.recibirMensaje(correo);
+                    }
+                    if (!insertado) Thread.yield(); 
+                }
+                System.out.println("Filtro de Spam ha verificado un correo no spam del Cliente Emisor " +
+                        correo.idCliente + " y lo ha enviado al buzón de entrega.");
+            }
         }
-    }
-    
-    public void enviarMensajeFinABuzonEntrega() {
-    	while(buzonEntrada.ocupacion != 0 && buzonCuarentena.ocupacion != 0) {
-    		//el enunciado no indica el tipo de espera conveniente, chat aconseja meterle un sleep de 200ms
-    		try {
-				FiltroSpam.sleep(200);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-    	}
-    	
-    	//nuevamente, para mandarle el correo a cuarentena y a entrega, toca que sea semiactiva, osea hay que usar ese yield:
-    	Correo correoFinParaAmbos = new Correo(-1, false, false, false);
-    	correoFinParaAmbos.setFinDefinitivo();
-    	
-    	boolean checkSemiActiva = false;
-    	while(!checkSemiActiva) {
-    		synchronized (buzonEntrega) {
-    			checkSemiActiva = buzonEntrega.recibirMensaje(correoFinParaAmbos);
-    		}
-    		if(checkSemiActiva == false) {
-    			FiltroSpam.yield();
-    		}
-    		
-    	}
-    	
-    	boolean checkSemiActiva2 = false;
-    	while(!checkSemiActiva) {
-    		synchronized (buzonCuarentena) {
-    			checkSemiActiva2 = buzonCuarentena.recibirMensaje(correoFinParaAmbos);
-    		}
-    		if(checkSemiActiva2 == false) {
-    			FiltroSpam.yield();
-    		}
-    		
-    	}
-    	
 
-    	
-    	
-    	
+        System.out.println(this.getName() + " ha finalizado su ejecución.");
     }
 
+
+    private void enviarMensajeFinABuzonEntrega() {
+        Correo correoFin = new Correo(-1, false, false, false);
+        correoFin.setFinDefinitivo();
+
+
+        while (buzonEntrada.ocupacion != 0 || buzonCuarentena.ocupacion != 0) {
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+
+        boolean entregado = false;
+        while (!entregado) {
+            synchronized (buzonEntrega) {
+                entregado = buzonEntrega.recibirMensaje(correoFin);
+            }
+            if (!entregado) Thread.yield();
+        }
+
+        buzonCuarentena.recibirMensaje(correoFin);
+        System.out.println("Correo de fin enviado correctamente a entrega y cuarentena.");
+    }
 }

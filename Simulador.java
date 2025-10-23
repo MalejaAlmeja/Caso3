@@ -1,53 +1,64 @@
-package caso3;
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-
 public class Simulador {
+
+    // Buzones compartidos
+    private static BuzonEntrada buzonEntrada;
+    private static BuzonCuarentena buzonCuarentena;
+    private static BuzonEntrega buzonEntrega;
+
+    // Parámetros configurables
+    private static final int NUM_CLIENTES = 5;
+    private static final int NUM_FILTROS = 5;
+    private static final int NUM_SERVIDORES = 3;
+
+    private static final int cantidadCorreosPorClientes = 5;
+
     public static void main(String[] args) {
-    
-        int clientesEmisores = 0;
-        int mensajesPorCliente = 0;
-        int filtrosSpam = 0;
-        int servidoresEntrega = 0;
-        int capacidadMaximaBuzonEntrada = 0;
-        int capacidadBuzonEntrega = 0;
+        System.out.println("========== INICIO DE LA SIMULACIÓN ==========");
+
+  
+        buzonEntrada = new BuzonEntrada(10);
+        buzonCuarentena = new BuzonCuarentena();
+        buzonEntrega = new BuzonEntrega(10);
 
 
-        try (BufferedReader br = new BufferedReader(new FileReader("config.txt"))) {
-            String linea;
-            while ((linea = br.readLine()) != null) {
-                if (linea.startsWith("Numero clientes emisores:")) {
-                    clientesEmisores = Integer.parseInt(linea.split(": ")[1].trim());
-                } else if (linea.startsWith("Numero mensajes por cliente:")) {
-                    mensajesPorCliente = Integer.parseInt(linea.split(": ")[1].trim());
-                } else if (linea.startsWith("Numero filtros de spam:")) {
-                    filtrosSpam = Integer.parseInt(linea.split(": ")[1].trim());
-                } else if (linea.startsWith("Numero de servidores de entrega:")) {
-                    servidoresEntrega = Integer.parseInt(linea.split(": ")[1].trim());
-                } else if (linea.startsWith("Capacidad maxima de buzon de entrada:")) {
-                    capacidadMaximaBuzonEntrada = Integer.parseInt(linea.split(":")[1].trim());
-                } else if (linea.startsWith("Capacidad del buzon de entrega:")) {
-                    capacidadBuzonEntrega = Integer.parseInt(linea.split(": ")[1].trim());
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        FiltroSpam.numClienteTot = NUM_CLIENTES;
+        FiltroSpam.numeroClientes = 0;
+        FiltroSpam.numeroClientesProcesados = 0;
+        FiltroSpam.servidoresIniciados = false;
 
-        BuzonEntrada buzonEntrada = new BuzonEntrada(capacidadMaximaBuzonEntrada);
-        BuzonEntrega buzonEntrega = new BuzonEntrega(capacidadBuzonEntrega);
-        BuzonCuarentena buzonCuarentena = new BuzonCuarentena();
+        ServidorEntrega.llegoMensajeFin = false; 
 
-        for (int i = 0; i < clientesEmisores; i++) {
-            ClienteEmisor cliente = new ClienteEmisor(i + 1, mensajesPorCliente,buzonEntrada);
+
+        for (int i = 1; i <= NUM_CLIENTES; i++) {
+            ClienteEmisor cliente = new ClienteEmisor(i, buzonEntrada, cantidadCorreosPorClientes);
             cliente.start();
         }
-        //No sé si sea lógico despertar a los filtros de spam desde aquí de una vez. debería ser algún cliente emisor
-        // que lo despierte pero no sé cómo.
-        for (int i = 0; i < filtrosSpam; i++) {
-            FiltroSpam filtro = new FiltroSpam(filtrosSpam, buzonEntrada, buzonCuarentena, buzonEntrega);
+
+        for (int i = 1; i <= NUM_FILTROS; i++) {
+            FiltroSpam filtro = new FiltroSpam(buzonEntrada, buzonCuarentena, buzonEntrega);
+            filtro.setName("Filtro-" + i);
             filtro.start();
         }
-    
-    }}
+
+        while (!ServidorEntrega.llegoMensajeFin) {
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+
+        System.out.println("========== SIMULACIÓN FINALIZADA ==========");
+    }
+
+    public static void iniciarServidoresEntrega() {
+        System.out.println("Iniciando servidores de entrega...");
+
+        for (int i = 1; i <= NUM_SERVIDORES; i++) {
+            ServidorEntrega servidor = new ServidorEntrega("ServidorEntrega-" + i, buzonEntrega);
+            servidor.start();
+        }
+
+        System.out.println(NUM_SERVIDORES + " servidores de entrega iniciados correctamente.");
+    }
+}
