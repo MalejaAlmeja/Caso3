@@ -1,31 +1,32 @@
 import java.util.ArrayList;
+import java.util.List;
 
 public class BuzonCuarentena {
     public int ocupacion = 0;
-    public static ArrayList<Correo> correos;
+    private final ArrayList<Correo> correos;
 
-    public BuzonCuarentena(){}
-
-    //ESPERA SEMIACTIVA - CORREGIR
-    public synchronized void recibirMensaje(Correo correo){
-        //ACÁ QUÉ PONGO????
-        ocupacion++;
-        correos.add(correo); 
+    public BuzonCuarentena(){
+        this.correos = new ArrayList<>();
     }
 
-    //ESPERA SEMIACTIVA - CORREGIR
-    public synchronized void eliminarMensaje(Correo correo){
-        while (ocupacion == 0) {
-            try {
-                wait();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
+    public synchronized boolean recibirMensaje(Correo correo){
+        correos.add(correo);
+        ocupacion = correos.size();
         notifyAll();
-        ocupacion--;
-        correos.remove(correo);
+        return true;
     }
 
-    
+    public synchronized boolean eliminarMensaje(Correo correo){
+        boolean removed = correos.remove(correo);
+        if (removed) {
+            ocupacion = correos.size();
+            notifyAll();
+        }
+        return removed;
+    }
+
+    public synchronized List<Correo> getSnapshot(){
+        return new ArrayList<>(this.correos);
+    }
 }
+

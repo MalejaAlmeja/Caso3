@@ -1,40 +1,34 @@
 import java.util.ArrayList;
 
 public class BuzonEntrega {
- private int capacidad = 0;
- private int ocupacion = 0;
- public static ArrayList<Correo> correos;
+    private int capacidad;
+    private int ocupacion = 0;
+    private final ArrayList<Correo> correos;
 
     public BuzonEntrega(int capacidad) {
         this.capacidad = capacidad;
+        this.correos = new ArrayList<>();
     }   
 
-    //ESPERA SEMIACTIVA - CAMBIAR CREO - NO SÉ DÓNDE DE PONE EL YIELD
-    public synchronized void recibirMensaje(Correo correo){
-        while (ocupacion == capacidad) {
-            try {
-                wait();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+    // Semiactiva: devuelve false si está lleno
+    public synchronized boolean recibirMensaje(Correo correo){
+        if (ocupacion == capacidad) {
+            return false;
         }
+        correos.add(correo);
+        ocupacion = correos.size();
         notifyAll();
-        ocupacion++;
-        correos.add(correo); 
+        return true;
     }
 
-    //ESPERA ACTIVA - CAMBIAR
-    public synchronized void eliminarMensaje(Correo correo){
-        while (ocupacion == 0) {
-            try {
-                wait();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+    // Espera activa en servidores: devuelve null si vacío
+    public synchronized Correo eliminarMensaje() {
+        if (correos.isEmpty()) {
+            return null; 
         }
-        notifyAll();
-        ocupacion--;
-        correos.remove(correo);
+        Correo c = correos.remove(0);
+        ocupacion = correos.size();
+        notifyAll(); 
+        return c;
     }
-    
 }
