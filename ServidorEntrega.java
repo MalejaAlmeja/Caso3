@@ -16,11 +16,11 @@ public class ServidorEntrega extends Thread {
         while(!llegoMensajeFin) {
             Correo correo = buzonEntrega.eliminarMensaje();
             if(correo == null) {
-                Thread.yield();
+                //Thread.yield();//Migue, seguro este yield iría aquí? No sería espera activa aquí nomás con continue?
+                //Funciona bien si se quita el yield, pero lo dejo a tu decición :)
                 continue;
             }
             if(correo.finDefinitivo) {
-                // marcar fin global y terminar
                 llegoMensajeFin = true;
                 break;
             } else {
