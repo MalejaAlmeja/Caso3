@@ -7,11 +7,10 @@ public class FiltroSpam extends Thread {
     private final BuzonCuarentena buzonCuarentena;
     private final BuzonEntrega buzonEntrega;
 
-    // Variables estáticas compartidas
     public static int numeroClientes = 0;
     public static int numClienteTot = 0;
     public static int numeroClientesProcesados = 0;
-    public static boolean servidoresIniciados = false; // 🔹 nuevo flag para iniciar entrega solo una vez
+    public static boolean servidoresIniciados = false;
 
     public FiltroSpam(BuzonEntrada buzonEntrada, BuzonCuarentena buzonCuarentena, BuzonEntrega buzonEntrega) {
         this.buzonEntrada = buzonEntrada;

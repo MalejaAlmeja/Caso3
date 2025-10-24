@@ -9,6 +9,7 @@ public class BuzonCuarentena {
         this.correos = new ArrayList<>();
     }
 
+    //Manda un booleano para hacer la espera semiactiva.
     public synchronized boolean recibirMensaje(Correo correo){
         correos.add(correo);
         ocupacion = correos.size();
@@ -16,6 +17,7 @@ public class BuzonCuarentena {
         return true;
     }
 
+    //Manda un booleano para hacer la espera semiactiva.
     public synchronized boolean eliminarMensaje(Correo correo){
         boolean removed = correos.remove(correo);
         if (removed) {
@@ -25,7 +27,7 @@ public class BuzonCuarentena {
         return removed;
     }
 
-    public synchronized List<Correo> getSnapshot(){
+    public synchronized List<Correo> getCorreos(){
         return new ArrayList<>(this.correos);
     }
 }

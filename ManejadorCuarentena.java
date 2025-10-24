@@ -14,7 +14,7 @@ public class ManejadorCuarentena extends Thread{
     @Override
     public void run() {
         while(true) {
-            List<Correo> copia = buzonCuarentena.getSnapshot();
+            List<Correo> copia = buzonCuarentena.getCorreos();
             for(Correo correo : copia) {
                 synchronized (correo) {
                     if (correo.tiempoSpam > 0) {

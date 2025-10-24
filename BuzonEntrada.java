@@ -24,12 +24,13 @@ public class BuzonEntrada {
         });
     }
 
-    // Bloqueante: clientes esperan si lleno
+    // Espera pasiva: clientes esperan si lleno
     public synchronized void recibirMensaje(ClienteEmisor cliente, Correo correo){
         while (ocupacion == capacidad) {
             try {
                 System.out.println("El cliente " + cliente.idCliente + " ha dejado de enviar correos (se durmió) dado que el buzón de entrada está lleno.");
                 wait();
+                System.out.println("El cliente " + cliente.idCliente + " ha seguido enviando correos pues hay espacio en el buzón.");
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
@@ -39,7 +40,7 @@ public class BuzonEntrada {
         notifyAll();
     }
 
-    // Bloqueante: filtros esperan si vacío
+    // Espera pasiva: filtros esperan si vacío
     public synchronized Correo sacarCorreo(Thread filtroSpam){
         while(ocupacion == 0){
             try {
