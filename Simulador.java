@@ -1,3 +1,7 @@
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+
 public class Simulador {
 
     // Buzones compartidos
@@ -6,20 +10,35 @@ public class Simulador {
     private static BuzonEntrega buzonEntrega;
 
     // Parámetros configurables
-    private static final int NUM_CLIENTES = 5;
-    private static final int NUM_FILTROS = 5;
-    private static final int NUM_SERVIDORES = 3;
-
-    private static final int cantidadCorreosPorClientes = 5;
+    private static int NUM_CLIENTES;
+    private static int NUM_FILTROS;
+    private static int NUM_SERVIDORES;
+    private static int NUM_CORREOS;
+    private static int CAPACIDAD_ENTRADA;
+    private static int CAPACIDAD_ENTREGA;
 
     public static void main(String[] args) {
+        //Lectura del archivo
+
+       try (BufferedReader br = new BufferedReader(new FileReader("config.txt"))) {
+            NUM_CLIENTES = Integer.parseInt(br.readLine().split(":")[1].trim());
+            NUM_FILTROS = Integer.parseInt(br.readLine().split(":")[1].trim());
+            NUM_SERVIDORES = Integer.parseInt(br.readLine().split(":")[1].trim());
+            NUM_CORREOS = Integer.parseInt(br.readLine().split(":")[1].trim());
+            CAPACIDAD_ENTRADA = Integer.parseInt(br.readLine().split(":")[1].trim());
+            CAPACIDAD_ENTREGA = Integer.parseInt(br.readLine().split(":")[1].trim());
+        } catch (IOException | NumberFormatException | ArrayIndexOutOfBoundsException e) {
+            System.err.println("Error al leer el archivo de configuración: " + e.getMessage());
+            System.exit(1);
+        }
+
+        //Finalizar de leer el archivo
+
         System.out.println("========== INICIO DE LA SIMULACIÓN ==========");
 
-  
-        buzonEntrada = new BuzonEntrada(10);
+        buzonEntrada = new BuzonEntrada(CAPACIDAD_ENTRADA);
         buzonCuarentena = new BuzonCuarentena();
-        buzonEntrega = new BuzonEntrega(10);
-
+        buzonEntrega = new BuzonEntrega(CAPACIDAD_ENTREGA);
 
         FiltroSpam.numClienteTot = NUM_CLIENTES;
         FiltroSpam.numeroClientes = 0;
@@ -30,7 +49,7 @@ public class Simulador {
 
 
         for (int i = 1; i <= NUM_CLIENTES; i++) {
-            ClienteEmisor cliente = new ClienteEmisor(i, buzonEntrada, cantidadCorreosPorClientes);
+            ClienteEmisor cliente = new ClienteEmisor(i, buzonEntrada, NUM_CORREOS);
             cliente.start();
         }
 
