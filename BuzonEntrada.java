@@ -24,13 +24,12 @@ public class BuzonEntrada {
         });
     }
 
-    // Espera pasiva: clientes esperan si lleno
     public synchronized void recibirMensaje(ClienteEmisor cliente, Correo correo){
         while (ocupacion == capacidad) {
             try {
-                System.out.println("El cliente " + cliente.idCliente + " ha dejado de enviar correos (se durmió) dado que el buzón de entrada está lleno.");
+                System.out.println("[Cliente " + cliente.idCliente + "]: Dejó de enviar correos (se durmió) porque el buzón de entrada está lleno. ");
                 wait();
-                System.out.println("El cliente " + cliente.idCliente + " ha seguido enviando correos pues hay espacio en el buzón.");
+                System.out.println("[Cliente " + cliente.idCliente + "]: Despertó y vuelve a enviar correos porque el buzón de entrada tiene espacio. ");
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
@@ -40,16 +39,18 @@ public class BuzonEntrada {
         notifyAll();
     }
 
-    // Espera pasiva: filtros esperan si vacío
     public synchronized Correo sacarCorreo(Thread filtroSpam){
         while(ocupacion == 0){
             try {
-                System.out.println("El buzón de entrada está vacío, por lo que el filtro " + filtroSpam.getName() + " se queda dormido.");
+                System.out.println("[" + filtroSpam.getName() + "]: Se duerme porque el buzón de entrada está vacío. ");
                 wait();
+                System.out.println("[" + filtroSpam.getName() + "]: Se despierta porque hay correos en el buzón de entrada. ");
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
         }
+        
+
         Correo correoRetirar = this.correos.poll();
         ocupacion = correos.size();
         notifyAll();

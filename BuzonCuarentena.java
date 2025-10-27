@@ -9,15 +9,14 @@ public class BuzonCuarentena {
         this.correos = new ArrayList<>();
     }
 
-    //Manda un booleano para hacer la espera semiactiva.
     public synchronized boolean recibirMensaje(Correo correo){
         correos.add(correo);
+        //System.out.println("[" + thread.getName() + "]: Recibió el correo " + correo.getId()+ " que es de tipo Spam del cliente " + correo.idCliente+ " y lo envió a cuarentena. ");
         ocupacion = correos.size();
         notifyAll();
         return true;
     }
 
-    //Manda un booleano para hacer la espera semiactiva.
     public synchronized boolean eliminarMensaje(Correo correo){
         boolean removed = correos.remove(correo);
         if (removed) {
