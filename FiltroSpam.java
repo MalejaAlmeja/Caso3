@@ -22,7 +22,7 @@ public class FiltroSpam extends Thread {
     public void run() {
         System.out.println("[" + this.getName() + "]: Despertó. ");
 
-        boolean finalizado = false; // bandera para evitar múltiples mensajes de cierre
+        boolean finalizado = false;
 
         while (true) {
             if (ServidorEntrega.llegoMensajeFin) break;
@@ -54,7 +54,7 @@ public class FiltroSpam extends Thread {
                         System.out.println("======= Todos los correos de los clientes ya fueron recibidos ======");
                         System.out.println("[" + this.getName() + "]: Envía el correo de fin a todos los servidores de entrega y al buzón de cuarentena.");
                         enviarMensajeFinABuzonEntrega();
-                        finalizado = true; // marcar que este filtro ya cerró
+                        finalizado = true;
                         break;
                     }
                 }
@@ -79,7 +79,6 @@ public class FiltroSpam extends Thread {
             }
         }
 
-        // 🔹 Mensaje único de finalización
         if (finalizado || ServidorEntrega.llegoMensajeFin) {
             System.out.println("[" + this.getName() + "]: Terminó su ejecución al quedar los buzones necesarios vacíos.");
         }
@@ -90,7 +89,6 @@ public class FiltroSpam extends Thread {
         Correo correoFin = new Correo(-1, false, false, false);
         correoFin.setFinDefinitivo();
 
-        // Esperar a que no queden correos por procesar
         while (buzonEntrada.ocupacion != 0 || buzonCuarentena.ocupacion != 0) {
             try {
                 Thread.sleep(200);

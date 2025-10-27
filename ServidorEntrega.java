@@ -17,9 +17,7 @@ public class ServidorEntrega extends Thread {
             Correo correo = buzonEntrega.eliminarMensaje(this);
 
             if (correo == null) {
-                // Espera semiactiva
                 try { Thread.sleep(50); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
-                // si ya llegó el fin y no hay más mensajes, terminamos
                 if (llegoMensajeFin && buzonEntregaVacio()) break;
                 continue;
             }
@@ -30,6 +28,7 @@ public class ServidorEntrega extends Thread {
             } else {
                 int tiempoLectura = random.nextInt(1, 1001);
                 try { Thread.sleep(tiempoLectura); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+                System.out.println("[Servidor de entrega]: Procesa el correo "+ correo.getId());
             }
         }
 
@@ -39,7 +38,6 @@ public class ServidorEntrega extends Thread {
     private boolean buzonEntregaVacio() {
         synchronized (buzonEntrega) {
             try {
-                // acceso seguro al estado interno
                 var field = BuzonEntrega.class.getDeclaredField("ocupacion");
                 field.setAccessible(true);
                 return field.getInt(buzonEntrega) == 0;

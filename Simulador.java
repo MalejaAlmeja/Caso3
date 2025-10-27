@@ -17,7 +17,6 @@ public class Simulador {
     private static int limiteBuzonEntrada;
     private static int limiteBuzonEntrega;
 
-    // 🔹 NUEVO: para almacenar referencias a hilos creados
     private static final ArrayList<ClienteEmisor> clientes = new ArrayList<>();
     private static final ArrayList<FiltroSpam> filtros = new ArrayList<>();
     public static final ArrayList<ServidorEntrega> servidores = new ArrayList<>();
@@ -76,32 +75,28 @@ public class Simulador {
             }
         }
 
-        // 🔹 Esperar que los servidores, filtros y manejador terminen antes de finalizar el programa
         try {
             for (ClienteEmisor c : clientes) c.join();
-            System.out.println("A1");
+            System.out.println("Todos los clientes han terminado");
 
             if (manejadorCuarentena != null) manejadorCuarentena.join();
-            System.out.println("A3");
+            System.out.println("El manejador de cuarentena termina");
 
-            // Esperar servidores (se crean más tarde, así que usamos la lista estática)
             for (ServidorEntrega s : servidores) s.join();
+            System.out.println("Los servidores de entrega terminan");
 
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
 
-        // ✅ Ahora sí imprimimos el fin REAL
         System.out.println("========== FINALIZA EL CASO 3 DE TIC ==========");
     }
 
     public static void iniciarServidoresEntrega() {
-        System.out.println("Iniciando servidores de entrega");
-        //ServidorEntrega[] serv = new ServidorEntrega[numeroServidores];
 
         for (int i = 1; i <= numeroServidores; i++) {
             ServidorEntrega servidor = new ServidorEntrega("Servidor Entrega " + i, buzonEntrega);
-            servidores.add(servidor); // 🔹 almacenar referencia para hacer join luego
+            servidores.add(servidor);
             System.out.println("[" + servidor.nombre + "]: Se creó un nuevo servidor de entrega. ");
             servidor.start();
         }

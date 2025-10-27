@@ -15,9 +15,7 @@ public class ManejadorCuarentena extends Thread{
     public void run() {
         boolean seguirCorriendoCuarentena = true;
         while(seguirCorriendoCuarentena) {
-            //System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
             List<Correo> copia = buzonCuarentena.getCorreos();
-            //System.out.println("MAS VECESSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS");
             for(Correo correo : copia) {
 
                 if(correo.esFinDefinitivo()){
@@ -39,20 +37,11 @@ public class ManejadorCuarentena extends Thread{
                         }
                     }
                 }
-                //System.out.println("ENTREEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE");
 
-                /*
-                 * CORRECCIÓN:
-                 * Cuando tiempoSpam llega a 0 debemos retirar el correo de la cuarentena (eliminarMensaje)
-                 * y luego enviarlo al buzón de entrega en modo semiactivo. Si no eliminamos de cuarentena,
-                 * buzonCuarentena.ocupacion nunca baja y el filtro que intenta enviar FIN queda esperando.
-                 */
                 if(correo.tiempoSpam <= 0 && !correo.finDefinitivo) {
                     System.out.println("[Manejador Cuarentena]: Redujo el tiempo de espera en Spam a 0. ");
 
-                    // Primero eliminar de cuarentena (si aún está ahí)
                     boolean eliminado = buzonCuarentena.eliminarMensaje(correo);
-                    // Si lo eliminó (o si ya no estaba), intentamos insertarlo en buzón de entrega (semiactiva)
                     boolean checkSemiActiva = false;
                     while(!checkSemiActiva) {
                         synchronized (buzonEntrega) {
