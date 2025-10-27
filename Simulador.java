@@ -39,7 +39,7 @@ public class Simulador {
 
         buzonEntrada = new BuzonEntrada(limiteBuzonEntrada);
         buzonCuarentena = new BuzonCuarentena();
-        buzonEntrega = new BuzonEntrega(10);
+        buzonEntrega = new BuzonEntrega(limiteBuzonEntrega);
 
         manejadorCuarentena = new ManejadorCuarentena(buzonCuarentena, buzonEntrega);
         manejadorCuarentena.start();

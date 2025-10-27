@@ -28,7 +28,6 @@ public class ServidorEntrega extends Thread {
             } else {
                 int tiempoLectura = random.nextInt(1, 1001);
                 try { Thread.sleep(tiempoLectura); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
-                System.out.println("[Servidor de entrega]: Procesa el correo "+ correo.getId());
             }
         }
 
