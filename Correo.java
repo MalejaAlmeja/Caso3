@@ -17,10 +17,33 @@ public class Correo {
         this.esFin = esFin;
         this.id = idCliente * 100000 + SECUENCIAL.getAndIncrement();
     }
-    public int getId() { return id; }
-    public boolean esSpam() { return spam; }
-    public boolean esInicio() { return esInicio; }
-    public boolean esFin() { return esFin; }
-    public void setTiempoEsperaEnSpam(int tiempo) { this.tiempoSpam = tiempo; }
-    public void setFinDefinitivo() { this.finDefinitivo = true; }
+    public int getId() { 
+        return id; 
+    }
+
+    public boolean esSpam() { 
+        return spam; 
+    }
+
+    public boolean esInicio() { 
+        return esInicio; 
+    }
+
+    public boolean esFin() { 
+        return esFin; 
+    }
+
+    public void setTiempoEsperaEnSpam(int tiempo) { 
+        this.tiempoSpam = tiempo; 
+    }
+
+
+    public void setFinDefinitivo() { 
+        this.finDefinitivo = true; 
+    }
+
+    public boolean esFinDefinitivo(){
+        return this.finDefinitivo; 
+    }
+
 }
