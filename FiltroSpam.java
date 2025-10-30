@@ -63,7 +63,13 @@ public class FiltroSpam extends Thread {
             else if (correo.esSpam()) {
                 int tiempoEsperaSpam = random.nextInt(10000, 20001);
                 correo.setTiempoEsperaEnSpam(tiempoEsperaSpam);
-                buzonCuarentena.recibirMensaje(correo);
+                boolean insertado = false;
+                while (!insertado) {
+                    synchronized (buzonCuarentena) {
+                        insertado = buzonCuarentena.recibirMensaje(correo);;
+                    }
+                    if (!insertado) Thread.yield();
+                }
                 System.out.println("[" + this.getName() + "]: Recibió el correo " + correo.getId()+ " que es de tipo Spam del cliente " + correo.idCliente+ " y lo envió a cuarentena. ");
             }
 
