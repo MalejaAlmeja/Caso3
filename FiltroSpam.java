@@ -66,7 +66,7 @@ public class FiltroSpam extends Thread {
                 boolean insertado = false;
                 while (!insertado) {
                     synchronized (buzonCuarentena) {
-                        insertado = buzonCuarentena.recibirMensaje(correo);;
+                        insertado = buzonCuarentena.recibirMensaje(correo);
                     }
                     if (!insertado) Thread.yield();
                 }
