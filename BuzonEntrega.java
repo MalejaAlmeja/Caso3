@@ -2,7 +2,7 @@ import java.util.ArrayList;
 
 public class BuzonEntrega {
     private int capacidad;
-    private int ocupacion = 0;
+    public static int ocupacion = 0;
     private final ArrayList<Correo> correos;
 
     public BuzonEntrega(int capacidad) {
@@ -20,15 +20,15 @@ public class BuzonEntrega {
         return true;
     }
 
-    public synchronized Correo eliminarMensaje(ServidorEntrega serv) {
+    public synchronized Correo eliminarMensaje(ServidorEntrega servidor) {
         if (correos.isEmpty()) {
             return null; 
         }
 
-        Correo c = correos.remove(0);
-        System.out.println("[" + serv.nombre + "]: El servidor de entrega obtuvo el correo " + c.getId());
+        Correo correoRetirado = correos.remove(0);
+        System.out.println("[" + servidor.nombre + "]: El servidor de entrega obtuvo el correo " + correoRetirado.getId());
         ocupacion = correos.size();
         notifyAll(); 
-        return c;
+        return correoRetirado;
     }
 }

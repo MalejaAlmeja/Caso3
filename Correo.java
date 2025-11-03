@@ -1,7 +1,10 @@
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class Correo {
-    private static final AtomicInteger SECUENCIAL = new AtomicInteger(0);
+    //se le pregunto al profe sobre el uso del secuencial con AtomicInteger
+    //y nos menciono que el enunciado indicaba de poner un secuencial
+    
+    private static final AtomicInteger secuencial = new AtomicInteger(0);
     private int id;
     private boolean spam;
     private boolean esInicio;
@@ -15,7 +18,7 @@ public class Correo {
         this.spam = spam;
         this.esInicio = esInicio;
         this.esFin = esFin;
-        this.id = idCliente * 100000 + SECUENCIAL.getAndIncrement();
+        this.id = idCliente * 100000 + secuencial.getAndIncrement();
     }
     public int getId() { 
         return id; 

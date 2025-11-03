@@ -19,7 +19,10 @@ public class ClienteEmisor extends Thread {
         System.out.println("[Cliente " + idCliente + "]: Empieza a enviar correos. ");
         while(true){
             Correo correo = generarCorreo();
-            if(correo == null) break;
+            if(correo == null)
+            {
+                break;
+            } 
             buzonEntrada.recibirMensaje(this, correo);
         }
         System.out.println("[Cliente " + idCliente + "]: Terminó de enviar correos. ");

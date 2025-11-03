@@ -50,11 +50,18 @@ public class ManejadorCuarentena extends Thread{
                                 System.out.println("[Manejador Cuarentena]: Envió el correo " + correo.getId() + " al buzon de entrega después de la revisión. ");
                             }
                         }
-                        if(!checkSemiActiva) Thread.yield();
+                        if(!checkSemiActiva){
+                            Thread.yield();
+                        } 
                     }
                 }
             }
-            try { Thread.sleep(1000); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+            try { 
+                Thread.sleep(1000); 
+            } catch (InterruptedException e) 
+            { 
+                Thread.currentThread().interrupt(); 
+            }
         }
         System.out.println("[Manejador Cuarentena]: Se apaga");
 
