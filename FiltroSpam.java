@@ -25,64 +25,72 @@ public class FiltroSpam extends Thread {
         boolean finalizado = false;
 
         while (true) {
-            if (ServidorEntrega.llegoMensajeFin) break;
-
+            if (ServidorEntrega.llegoMensajeFin){
+                break;
+            }
+             
             Correo correo = buzonEntrada.sacarCorreo(this);
-            if (correo == null) continue;
+            if(correo != null){
+                    
+                if (correo.esInicio()) {
+                    synchronized (FiltroSpam.class) {
+                        numeroClientes++;
+                        if (!servidoresIniciados) {
+                            servidoresIniciados = true;
+                            System.out.println("====== Se detectó el primer correo de inicio, por lo que se inician los servidores de entrega. ======");
+                            Simulador.iniciarServidoresEntrega();
+                        }
+                    }
 
-            if (correo.esInicio()) {
-                synchronized (FiltroSpam.class) {
-                    numeroClientes++;
-                    if (!servidoresIniciados) {
-                        servidoresIniciados = true;
-                        System.out.println("====== Se detectó el primer correo de inicio, por lo que se inician los servidores de entrega. ======");
-                        Simulador.iniciarServidoresEntrega();
+                    System.out.println("[" + this.getName() + "]: Inició a recibir los correos de un nuevo cliente con id: " + correo.idCliente);
+                }
+
+                else if (correo.esFin()) {
+                    synchronized (FiltroSpam.class) {
+                        numeroClientesProcesados++;
+                        System.out.println("[" + this.getName() + "]: Recibió todos los correos del cliete " + correo.idCliente);
+
+                        if (numeroClientesProcesados >= numClienteTot && !ServidorEntrega.llegoMensajeFin) {
+                            ServidorEntrega.llegoMensajeFin = true;
+
+                            System.out.println("======= Todos los correos de los clientes ya fueron recibidos ======");
+                            System.out.println("[" + this.getName() + "]: Envía el correo de fin a todos los servidores de entrega y al buzón de cuarentena.");
+                            enviarMensajeFinABuzonEntrega();
+                            finalizado = true;
+                            break;
+                        }
                     }
                 }
 
-                System.out.println("[" + this.getName() + "]: Inició a recibir los correos de un nuevo cliente con id: " + correo.idCliente);
-            }
-
-            else if (correo.esFin()) {
-                synchronized (FiltroSpam.class) {
-                    numeroClientesProcesados++;
-                    System.out.println("[" + this.getName() + "]: Recibió todos los correos del cliete " + correo.idCliente);
-
-                    if (numeroClientesProcesados >= numClienteTot && !ServidorEntrega.llegoMensajeFin) {
-                        ServidorEntrega.llegoMensajeFin = true;
-
-                        System.out.println("======= Todos los correos de los clientes ya fueron recibidos ======");
-                        System.out.println("[" + this.getName() + "]: Envía el correo de fin a todos los servidores de entrega y al buzón de cuarentena.");
-                        enviarMensajeFinABuzonEntrega();
-                        finalizado = true;
-                        break;
+                else if (correo.esSpam()) {
+                    int tiempoEsperaSpam = random.nextInt(10000, 20001);
+                    correo.setTiempoEsperaEnSpam(tiempoEsperaSpam);
+                    boolean insertado = false;
+                    while (!insertado) {
+                        synchronized (buzonCuarentena) {
+                            insertado = buzonCuarentena.recibirMensaje(correo);
+                        }
+                        if (!insertado){
+                            Thread.yield();
+                        } 
                     }
+                    System.out.println("[" + this.getName() + "]: Recibió el correo " + correo.getId()+ " que es de tipo Spam del cliente " + correo.idCliente+ " y lo envió a cuarentena. ");
+                }
+
+                else {
+                    boolean insertado = false;
+                    while (!insertado) {
+                        synchronized (buzonEntrega) {
+                            insertado = buzonEntrega.recibirMensaje(correo);
+                        }
+                        if (!insertado){
+                            Thread.yield();
+                        } 
+                    }
+                    System.out.println("[" + this.getName() + "]: Recibió el correo " + correo.getId()+ " sin spam y lo envió al buzón de entrega. ");
                 }
             }
 
-            else if (correo.esSpam()) {
-                int tiempoEsperaSpam = random.nextInt(10000, 20001);
-                correo.setTiempoEsperaEnSpam(tiempoEsperaSpam);
-                boolean insertado = false;
-                while (!insertado) {
-                    synchronized (buzonCuarentena) {
-                        insertado = buzonCuarentena.recibirMensaje(correo);
-                    }
-                    if (!insertado) Thread.yield();
-                }
-                System.out.println("[" + this.getName() + "]: Recibió el correo " + correo.getId()+ " que es de tipo Spam del cliente " + correo.idCliente+ " y lo envió a cuarentena. ");
-            }
-
-            else {
-                boolean insertado = false;
-                while (!insertado) {
-                    synchronized (buzonEntrega) {
-                        insertado = buzonEntrega.recibirMensaje(correo);
-                    }
-                    if (!insertado) Thread.yield();
-                }
-                System.out.println("[" + this.getName() + "]: Recibió el correo " + correo.getId()+ " sin spam y lo envió al buzón de entrega. ");
-            }
         }
 
         if (finalizado || ServidorEntrega.llegoMensajeFin) {
@@ -108,7 +116,9 @@ public class FiltroSpam extends Thread {
             synchronized (buzonEntrega) {
                 entregado = buzonEntrega.recibirMensaje(correoFin);
             }
-            if (!entregado) Thread.yield();
+            if (!entregado){
+                Thread.yield();
+            } 
         }
 
         buzonCuarentena.recibirMensaje(correoFin);

@@ -10,16 +10,29 @@ public class BuzonEntrada {
         this.capacidad = capacidad;
         this.correos = new PriorityQueue<>(new Comparator<Correo>() {
             @Override
-            public int compare(Correo c1, Correo c2) {
-                int p1 = prioridad(c1);
-                int p2 = prioridad(c2);
-                if (p1 != p2) return Integer.compare(p1, p2);
-                return Integer.compare(c1.getId(), c2.getId());
+            public int compare(Correo correo1, Correo correo2) {
+                int p1 = prioridad(correo1);
+                int p2 = prioridad(correo2);
+                if (p1 != p2)
+                {
+                    return Integer.compare(p1, p2);
+                } 
+                else{
+                    return Integer.compare(correo1.getId(), correo2.getId());
+                }
             }
-            private int prioridad(Correo c) {
-                if (c.esInicio()) return 1;
-                if (c.esFin()) return 3;
-                return 2;
+
+            private int prioridad(Correo correosPrioridad) {
+                if (correosPrioridad.esInicio()) {
+                    return 1;
+                }
+                else if(correosPrioridad.esFin()){
+                    return 3;
+                }
+                else{
+                    return 2;
+                }
+                
             }
         });
     }

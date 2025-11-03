@@ -51,14 +51,12 @@ public class Simulador {
 
         ServidorEntrega.llegoMensajeFin = false;
 
-        // Crear y lanzar clientes
         for (int i = 1; i <= numeroClientes; i++) {
             ClienteEmisor cliente = new ClienteEmisor(i, buzonEntrada, numeroCorreosPorUsuario);
             clientes.add(cliente);
             cliente.start();
         }
 
-        // Crear y lanzar filtros
         for (int i = 1; i <= numeroFiltrosSpam; i++) {
             FiltroSpam filtro = new FiltroSpam(buzonEntrada, buzonCuarentena, buzonEntrega);
             filtro.setName("Filtro " + i);
@@ -66,7 +64,6 @@ public class Simulador {
             filtro.start();
         }
 
-        // Esperar a que llegue el mensaje de fin global
         while (!ServidorEntrega.llegoMensajeFin) {
             try {
                 Thread.sleep(500);
@@ -76,13 +73,19 @@ public class Simulador {
         }
 
         try {
-            for (ClienteEmisor c : clientes) c.join();
+            for (ClienteEmisor c : clientes){
+                c.join();
+            } 
             System.out.println("Todos los clientes han terminado");
 
-            if (manejadorCuarentena != null) manejadorCuarentena.join();
+            if (manejadorCuarentena != null){
+                manejadorCuarentena.join();
+            } 
             System.out.println("El manejador de cuarentena termina");
 
-            for (ServidorEntrega s : servidores) s.join();
+            for (ServidorEntrega s : servidores){
+                s.join();
+            } 
             System.out.println("Los servidores de entrega terminan");
 
         } catch (InterruptedException e) {
